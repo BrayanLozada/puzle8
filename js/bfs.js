@@ -2,7 +2,7 @@
 // Lógica del puzle lineal de 8 dígitos usando BFS (búsqueda no informada)
 // - Estados representados como arrays de longitud 8: [1,2,3,4,5,6,7,8]
 // - Acción: intercambiar elementos adyacentes (i, i+1)
-// - Retorna solución óptima en número de swaps adyacentes
+// - Retorna solución óptima en número de intercambios adyacentes
 
 /**
  * Genera vecinos intercambiando pares adyacentes.
@@ -14,9 +14,9 @@ export function vecinos(state) {
   for (let i = 0; i < state.length - 1; i++) {
     const next = state.slice();
     const j = i + 1;
-    // swap adyacente
+    // intercambio adyacente
     [next[i], next[j]] = [next[j], next[i]];
-    res.push({ next, move: { i, j } });
+    res.push({ next, move: { i: i + 1, j: j + 1 } });
   }
   return res;
 }
@@ -44,7 +44,7 @@ function reconstruirCamino(padres, goalKey, estados) {
 }
 
 /**
- * BFS que encuentra el camino óptimo de swaps adyacentes.
+ * BFS que encuentra el camino óptimo de intercambios adyacentes.
  * @param {number[]} inicio array de 8 números
  * @param {number[]} meta array de 8 números
  * @returns {{pasos:number, camino:number[][], movimientos:{i:number,j:number}[]}}
@@ -52,7 +52,8 @@ function reconstruirCamino(padres, goalKey, estados) {
 export function bfsLinear(inicio, meta) {
   const startKey = inicio.join(',');
   const goalKey = meta.join(',');
-  if (startKey === goalKey) return { pasos: 0, camino: [inicio.slice()], movimientos: [] };
+  if (startKey === goalKey)
+    return { pasos: 0, camino: [inicio.slice()], movimientos: [], nodosExplorados: 1, iteraciones: 0 };
 
   // Estructuras BFS
   const q = [inicio.slice()];
@@ -60,8 +61,13 @@ export function bfsLinear(inicio, meta) {
   const padres = new Map([[startKey, { parent: null, move: null }]]);
   const estados = new Map([[startKey, inicio.slice()]]);
 
+  let nodosExplorados = 0;
+  let iteraciones = 0;
+
   while (q.length) {
     const estado = q.shift();
+    nodosExplorados++;
+    iteraciones++;
     const vecinosList = vecinos(estado);
     for (const { next, move } of vecinosList) {
       const k = next.join(',');
@@ -70,7 +76,8 @@ export function bfsLinear(inicio, meta) {
       padres.set(k, { parent: estado.join(','), move });
       estados.set(k, next);
       if (k === goalKey) {
-        return reconstruirCamino(padres, k, estados);
+        const res = reconstruirCamino(padres, k, estados);
+        return { ...res, nodosExplorados, iteraciones };
       }
       q.push(next);
     }
