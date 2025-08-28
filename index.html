@@ -75,6 +75,10 @@
             margin: 2px;
         }
         
+                .tile.swapped {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+        }
+        
         .tile:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
@@ -316,11 +320,11 @@
 </head>
 <body>
     <div class="container">
-        <h1>🧩 Solucionador de Puzle Lineal de 8 Dígitos</h1>
+        <h1>Solucionador de Puzle Lineal de 8 Dígitos</h1>
         
         <div class="algorithm-info">
             <h3>Algoritmo BFS para 8 Posiciones</h3>
-            <p>Este solucionador utiliza BFS para encontrar la solución óptima al puzle lineal de 8 dígitos. Los movimientos disponibles son intercambios entre posiciones adyacentes:</p>
+            <p>Este solucionador utiliza BFS para encontrar la solución óptima al puzle lineal de 8 dígitos. Los movimientos (operadores) disponibles son intercambios entre posiciones adyacentes:</p>
             
             <div class="movements-grid">
                 <div class="movement-item"><strong>M1:</strong> Intercambia posiciones 1 ↔ 2</div>
