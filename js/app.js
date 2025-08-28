@@ -108,11 +108,19 @@ function solvePuzzle() {
       for (let i = 1; i < camino.length; i++) {
         const estado = camino[i];
         const mov = movimientos[i - 1];
+        const puzzleHtml = estado
+          .map((n, idx) => {
+            const pos = idx + 1;
+            const swapped = mov && (pos === mov.i || pos === mov.j);
+            const extraClass = swapped ? ' swapped' : '';
+            return `<div class="tile${extraClass}">${n}</div>`;
+          })
+          .join('');
         html += `
           <div class="step">
             <div class="step-number">${i}</div>
             <div class="movement-info">${etiquetaMovimiento(mov)}</div>
-            <div class="puzzle">${estado.map((n) => `<div class="tile">${n}</div>`).join('')}</div>
+            <div class="puzzle">${puzzleHtml}</div>
           </div>`;
       }
       html += '</div>';
