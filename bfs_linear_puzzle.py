@@ -14,6 +14,7 @@ Nota: BFS garantiza solución óptima en número de intercambios adyacentes.
 from collections import deque
 from dataclasses import dataclass
 import argparse
+import sys
 from typing import Dict, List, Optional, Tuple
 
 
@@ -82,9 +83,9 @@ def bfs(inicio: str, meta: str) -> Resultado:
 
 def validar_cadenas(inicio: str, meta: str) -> None:
     if len(inicio) != 8 or len(meta) != 8:
-        raise argparse.ArgumentTypeError("Las cadenas deben tener longitud 8.")
+        raise ValueError("Las cadenas deben tener longitud 8.")
     if sorted(inicio) != sorted(meta):
-        raise argparse.ArgumentTypeError(
+        raise ValueError(
             "Inicio y meta deben contener los mismos símbolos (misma multiconjunto)."
         )
     # Opcional: advertir sobre duplicados (BFS sigue funcionando, pero el conteo óptimo
@@ -106,7 +107,11 @@ def main() -> None:
     args = parse_args()
     inicio = args.inicio.strip()
     meta = args.meta.strip()
-    validar_cadenas(inicio, meta)
+    try:
+        validar_cadenas(inicio, meta)
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
     res = bfs(inicio, meta)
 
     print(f"Pasos mínimos: {res.pasos}")
