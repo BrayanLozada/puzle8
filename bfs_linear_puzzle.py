@@ -2,7 +2,7 @@
 Resolver de puzle lineal de 8 dígitos con BFS (búsqueda no informada).
 
 Estado: cadena con 8 dígitos (por ejemplo, "12345678").
-Acciones: intercambiar posiciones adyacentes (i, i+1).
+Acciones: intercambiar posiciones adyacentes (i, i+1) con i en [1, 7].
 Objetivo: alcanzar la configuración objetivo con el mínimo número de intercambios.
 
 Uso:
@@ -18,7 +18,7 @@ import sys
 from typing import Dict, List, Optional, Tuple
 
 
-Move = Tuple[int, int]  # (i, j) índices intercambiados; siempre j = i+1
+Move = Tuple[int, int]  # (i, j) posiciones intercambiadas (1-based); siempre j = i+1
 
 
 def vecinos(state: str) -> List[Tuple[str, Move]]:
@@ -27,7 +27,7 @@ def vecinos(state: str) -> List[Tuple[str, Move]]:
     res: List[Tuple[str, Move]] = []
     for i in range(len(s) - 1):
         s[i], s[i + 1] = s[i + 1], s[i]
-        res.append(("".join(s), (i, i + 1)))
+        res.append(("".join(s), (i + 1, i + 2)))
         s[i], s[i + 1] = s[i + 1], s[i]  # deshacer
     return res
 
@@ -37,10 +37,17 @@ class Resultado:
     pasos: int
     camino: List[str]
     movimientos: List[Move]
+    nodos_explorados: int
+    iteraciones: int
 
 
-def reconstruir_camino(padres: Dict[str, Tuple[Optional[str], Optional[Move]]],
-                       meta: str, inicio: str) -> Resultado:
+def reconstruir_camino(
+    padres: Dict[str, Tuple[Optional[str], Optional[Move]]],
+    meta: str,
+    inicio: str,
+    nodos_explorados: int,
+    iteraciones: int,
+) -> Resultado:
     camino: List[str] = []
     movimientos: List[Move] = []
     actual: Optional[str] = meta
@@ -52,31 +59,48 @@ def reconstruir_camino(padres: Dict[str, Tuple[Optional[str], Optional[Move]]],
         actual = padre
     camino.reverse()
     movimientos.reverse()
-    return Resultado(pasos=len(camino) - 1, camino=camino, movimientos=movimientos)
+    return Resultado(
+        pasos=len(camino) - 1,
+        camino=camino,
+        movimientos=movimientos,
+        nodos_explorados=nodos_explorados,
+        iteraciones=iteraciones,
+    )
 
 
 def bfs(inicio: str, meta: str) -> Resultado:
     if inicio == meta:
-        return Resultado(pasos=0, camino=[inicio], movimientos=[])
+        return Resultado(
+            pasos=0,
+            camino=[inicio],
+            movimientos=[],
+            nodos_explorados=1,
+            iteraciones=0,
+        )
 
     q: deque[str] = deque([inicio])
     visitado = {inicio}
-    padres: Dict[str, Tuple[Optional[str], Optional[Move]]] = {
-        inicio: (None, None)
-    }
+    padres: Dict[str, Tuple[Optional[str], Optional[Move]]] = {inicio: (None, None)}
+
+    nodos_explorados = 0
+    iteraciones = 0
 
     while q:
         estado = q.popleft()
+        nodos_explorados += 1
+        iteraciones += 1
         for nxt, mov in vecinos(estado):
             if nxt in visitado:
                 continue
             visitado.add(nxt)
             padres[nxt] = (estado, mov)
             if nxt == meta:
-                return reconstruir_camino(padres, nxt, inicio)
+                return reconstruir_camino(
+                    padres, nxt, inicio, nodos_explorados, iteraciones
+                )
             q.append(nxt)
 
-    # En este grafo (todas las permutaciones alcanzables por swaps adyacentes) siempre hay camino,
+    # En este grafo (todas las permutaciones alcanzables por intercambios adyacentes) siempre hay camino,
     # así que no deberíamos llegar aquí si los alfabetos de inicio/meta coinciden.
     raise ValueError("No se encontró camino entre inicio y meta; verifica las entradas.")
 
@@ -89,11 +113,11 @@ def validar_cadenas(inicio: str, meta: str) -> None:
             "Inicio y meta deben contener los mismos símbolos (misma multiconjunto)."
         )
     # Opcional: advertir sobre duplicados (BFS sigue funcionando, pero el conteo óptimo
-    # de swaps deja de ser la distancia Kendall-Tau clásica).
+    # de intercambios deja de ser la distancia Kendall-Tau clásica).
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="BFS para puzle lineal de 8 dígitos (swaps adyacentes)")
+    p = argparse.ArgumentParser(description="BFS para puzle lineal de 8 dígitos (intercambios adyacentes)")
     p.add_argument("--start", "--inicio", dest="inicio", required=True,
                    help="Configuración inicial de 8 caracteres, p.ej. 12345678")
     p.add_argument("--goal", "--meta", dest="meta", required=True,
@@ -115,6 +139,8 @@ def main() -> None:
     res = bfs(inicio, meta)
 
     print(f"Pasos mínimos: {res.pasos}")
+    print(f"Nodos explorados: {res.nodos_explorados}")
+    print(f"Iteraciones: {res.iteraciones}")
     if args.show_path:
         print("Camino:")
         for i, estado in enumerate(res.camino):
@@ -122,7 +148,7 @@ def main() -> None:
                 print(f"  {i}: {estado} (inicio)")
             else:
                 a, b = res.movimientos[i - 1]
-                print(f"  {i}: {estado}  swap({a},{b})")
+                print(f"  {i}: {estado}  intercambio({a},{b})")
 
 
 if __name__ == "__main__":

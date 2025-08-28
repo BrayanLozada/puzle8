@@ -47,9 +47,9 @@ function showStats({ pasos, nodosExplorados, iteraciones }) {
 }
 
 /** Texto de movimiento legible */
-function movementLabel(move) {
+function etiquetaMovimiento(move) {
   if (!move) return '';
-  return `swap(${move.i},${move.j})  Pos ${move.i}↔${move.j}`;
+  return `intercambio(${move.i},${move.j})  Pos ${move.i}↔${move.j}`;
 }
 
 /** Valida que ambos estados tengan longitud 8 y mismo multiconjunto */
@@ -95,10 +95,10 @@ function solvePuzzle() {
       const t1 = performance.now();
 
       // Construir salida visual
-      const { pasos, camino, movimientos } = res;
+      const { pasos, camino, movimientos, nodosExplorados, iteraciones } = res;
 
-      // Estadísticas mínimas (tiempo medido en cliente)
-      showStats({ pasos, nodosExplorados: undefined, iteraciones: undefined });
+      // Estadísticas del algoritmo
+      showStats({ pasos, nodosExplorados, iteraciones });
 
       let html = '<div class="success-message">¡Solución encontrada!</div>';
       html += '<div class="solution-container">';
@@ -111,7 +111,7 @@ function solvePuzzle() {
         html += `
           <div class="step">
             <div class="step-number">${i}</div>
-            <div class="movement-info">${movementLabel(mov)}</div>
+            <div class="movement-info">${etiquetaMovimiento(mov)}</div>
             <div class="puzzle">${estado.map((n) => `<div class="tile">${n}</div>`).join('')}</div>
           </div>`;
       }
