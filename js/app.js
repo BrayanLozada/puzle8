@@ -108,11 +108,7 @@ function solvePuzzle() {
       for (let i = 1; i < camino.length; i++) {
         const estado = camino[i];
         const mov = movimientos[i - 1];
-<<<<<<< HEAD
-              const puzzleHtml = estado
-=======
         const puzzleHtml = estado
->>>>>>> 0fc086a4f13ecd40333f36ccad2379254c55d8db
           .map((n, idx) => {
             const pos = idx + 1;
             const swapped = mov && (pos === mov.i || pos === mov.j);
